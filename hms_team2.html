@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS Quality Management System (QMS)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#074e68',
+                            900: '#0c4a6e',
+                        },
+                        tealmed: {
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden antialiased">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="flex w-full h-full">
+
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between flex-shrink-0 z-20 border-r border-slate-800">
+            <div>
+                <!-- Brand Header -->
+                <div class="h-16 flex items-center gap-3 px-6 bg-slate-950 border-b border-slate-800">
+                    <div class="w-9 h-9 bg-gradient-to-tr from-medical-600 to-tealmed-500 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        <i class="fa-solid font-bold fa-hospital-user"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white text-base leading-tight">HMS QMS Hub</h1>
+                        <p class="text-xs text-slate-400">Healthcare Quality Portal</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="mt-6 px-3 space-y-1">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active-nav flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-lg text-white bg-medical-600 hover:bg-medical-700 transition">
+                        <i class="fa-solid fa-chart-line w-5 text-center text-lg"></i>
+                        <span>Dashboard Overview</span>
+                    </button>
+                    
+                    <button onclick="switchTab('defects')" id="nav-defects" class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-bug w-5 text-center text-lg"></i>
+                        <span>Defect Log</span>
+                        <span id="nav-defect-badge" class="ml-auto bg-rose-500/20 text-rose-400 text-xs font-semibold px-2 py-0.5 rounded-full">8</span>
+                    </button>
+
+                    <button onclick="switchTab('capa')" id="nav-capa" class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-shield-virus w-5 text-center text-lg"></i>
+                        <span>CAPA Register</span>
+                        <span id="nav-capa-badge" class="ml-auto bg-amber-500/20 text-amber-400 text-xs font-semibold px-2 py-0.5 rounded-full">5</span>
+                    </button>
+
+                    <button onclick="switchTab('quality')" id="nav-quality" class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-clipboard-check w-5 text-center text-lg"></i>
+                        <span>Quality Plan & KPIs</span>
+                    </button>
+
+                    <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-folder-open w-5 text-center text-lg"></i>
+                        <span>Reports & Documents</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-medical-500 text-white flex items-center justify-center font-bold text-xs">
+                        QA
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-semibold text-white truncate">Dr. Aris Thorne</p>
+                        <p class="text-xs text-slate-400 truncate">Lead QA Auditor</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENT AREA -->
+        <main class="flex-1 flex flex-col h-full bg-slate-50 overflow-hidden">
+            
+            <!-- TOP BAR -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10">
+                <div class="flex items-center gap-4">
+                    <h2 id="page-title" class="text-xl font-bold text-slate-800">Dashboard Overview</h2>
+                    <span class="text-xs bg-emerald-50 text-emerald-700 font-medium px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> QMS Live System Active
+                    </span>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="flex items-center gap-3">
+                    <button onclick="openDefectModal()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-semibold transition border border-slate-300">
+                        <i class="fa-solid fa-plus text-rose-500"></i> Log Defect
+                    </button>
+                    <button onclick="openCapaModal()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-semibold transition border border-slate-300">
+                        <i class="fa-solid fa-plus text-tealmed-600"></i> New CAPA Action
+                    </button>
+                    <button onclick="triggerToast('Syncing system data...', 'info')" class="p-2 text-slate-500 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB CONTENTS CONTAINER -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar" id="tab-container">
+
+                <!-- 1. DASHBOARD OVERVIEW TAB -->
+                <div id="tab-dashboard" class="tab-content space-y-6">
+                    
+                    <!-- KPI Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Defects</p>
+                                    <h3 id="kpi-total-defects" class="text-3xl font-bold text-slate-800 mt-1">8</h3>
+                                    <p class="text-xs text-rose-600 font-medium mt-2 flex items-center gap-1">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> 2 Critical Unassigned
+                                    </p>
+                                </div>
+                                <div class="p-3 bg-rose-50 text-rose-600 rounded-lg">
+                                    <i class="fa-solid fa-bug text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 h-1 bg-rose-500"></div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Open CAPA Actions</p>
+                                    <h3 id="kpi-open-capa" class="text-3xl font-bold text-slate-800 mt-1">5</h3>
+                                    <p class="text-xs text-amber-600 font-medium mt-2 flex items-center gap-1">
+                                        <i class="fa-solid fa-clock"></i> 1 Pending Audit Review
+                                    </p>
+                                </div>
+                                <div class="p-3 bg-amber-50 text-amber-600 rounded-lg">
+                                    <i class="fa-solid fa-shield-virus text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Audit Readiness</p>
+                                    <h3 class="text-3xl font-bold text-slate-800 mt-1">94.2%</h3>
+                                    <p class="text-xs text-emerald-600 font-medium mt-2 flex items-center gap-1">
+                                        <i class="fa-solid fa-arrow-up"></i> +2.4% from last month
+                                    </p>
+                                </div>
+                                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                                    <i class="fa-solid fa-award text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Resolution Time</p>
+                                    <h3 class="text-3xl font-bold text-slate-800 mt-1">3.5 <span class="text-base font-normal text-slate-500">days</span></h3>
+                                    <p class="text-xs text-tealmed-600 font-medium mt-2 flex items-center gap-1">
+                                        <i class="fa-solid fa-check"></i> Meets SLA Target (&lt; 5d)
+                                    </p>
+                                </div>
+                                <div class="p-3 bg-teal-50 text-tealmed-600 rounded-lg">
+                                    <i class="fa-solid fa-stopwatch text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0 h-1 bg-tealmed-500"></div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Metrics & Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Defect Severity Breakdown (Visual Bars) -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-bold text-slate-800">Defect Severity Distribution</h4>
+                                    <span class="text-xs text-slate-400">Current Sprint</span>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex justify-between text-xs font-medium mb-1">
+                                            <span class="text-rose-600 font-bold flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span> Critical</span>
+                                            <span id="severity-critical-count">2 Defects (25%)</span>
+                                        </div>
+                                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                            <div id="bar-critical" class="bg-rose-600 h-full rounded-full transition-all duration-500" style="width: 25%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex justify-between text-xs font-medium mb-1">
+                                            <span class="text-amber-600 font-bold flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> High</span>
+                                            <span id="severity-high-count">3 Defects (37.5%)</span>
+                                        </div>
+                                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                            <div id="bar-high" class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 37.5%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex justify-between text-xs font-medium mb-1">
+                                            <span class="text-sky-600 font-bold flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Medium</span>
+                                            <span id="severity-medium-count">2 Defects (25%)</span>
+                                        </div>
+                                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                            <div id="bar-medium" class="bg-sky-500 h-full rounded-full transition-all duration-500" style="width: 25%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex justify-between text-xs font-medium mb-1">
+                                            <span class="text-slate-600 font-bold flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span> Low</span>
+                                            <span id="severity-low-count">1 Defect (12.5%)</span>
+                                        </div>
+                                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                            <div id="bar-low" class="bg-slate-400 h-full rounded-full transition-all duration-500" style="width: 12.5%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                                <span>Updated: Just Now</span>
+                                <button onclick="switchTab('defects')" class="text-medical-600 hover:text-medical-700 font-semibold flex items-center gap-1">View All Defects <i class="fa-solid fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Departmental Quality Compliance -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h4 class="font-bold text-slate-800">Departmental Compliance Readiness</h4>
+                                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">Target: 90%</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-sm font-semibold text-slate-700">Patient Electronic Health Records</span>
+                                            <span class="text-xs font-bold text-emerald-600">96%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                            <div class="bg-emerald-500 h-full rounded-full" style="width: 96%"></div>
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-2">1 open minor CAPA issue</p>
+                                    </div>
+
+                                    <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-sm font-semibold text-slate-700">Pharmacy & Drug Prescriptions</span>
+                                            <span class="text-xs font-bold text-emerald-600">92%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                            <div class="bg-emerald-500 h-full rounded-full" style="width: 92%"></div>
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-2">2 defects resolved this week</p>
+                                    </div>
+
+                                    <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-sm font-semibold text-slate-700">Billing & Insurance Claims</span>
+                                            <span class="text-xs font-bold text-amber-600">84%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                            <div class="bg-amber-500 h-full rounded-full" style="width: 84%"></div>
+                                        </div>
+                                        <p class="text-xs text-amber-600 font-medium mt-2">Requires attention (Audit pending)</p>
+                                    </div>
+
+                                    <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-sm font-semibold text-slate-700">Laboratory Information System</span>
+                                            <span class="text-xs font-bold text-emerald-600">98%</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                            <div class="bg-emerald-500 h-full rounded-full" style="width: 98%"></div>
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-2">Zero critical bugs logged</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                                <span>ISO 13485 & HIPAA Compliance Framework</span>
+                                <button onclick="switchTab('quality')" class="text-medical-600 hover:text-medical-700 font-semibold flex items-center gap-1">Quality Plan Details <i class="fa-solid fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Stream -->
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-slate-800 mb-4">Recent Quality Audit Activities</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-4 text-xs p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="p-2 rounded-full bg-rose-100 text-rose-600"><i class="fa-solid fa-bug"></i></span>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-slate-800">Defect DEF-108 Logged: Patient Allergy Alert Failure</p>
+                                    <p class="text-slate-500">Pharmacy module fails to trigger pop-up for penicillin reaction.</p>
+                                </div>
+                                <span class="text-slate-400">10 mins ago</span>
+                            </div>
+
+                            <div class="flex items-center gap-4 text-xs p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="p-2 rounded-full bg-teal-100 text-tealmed-600"><i class="fa-solid fa-shield-virus"></i></span>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-slate-800">CAPA-004 Status Updated to In Progress</p>
+                                    <p class="text-slate-500">Assigned to Lead Engineer for lab result sync verification.</p>
+                                </div>
+                                <span class="text-slate-400">1 hour ago</span>
+                            </div>
+
+                            <div class="flex items-center gap-4 text-xs p-3 rounded-lg bg-slate-50 border border-slate-100">
+                                <span class="p-2 rounded-full bg-emerald-100 text-emerald-600"><i class="fa-solid fa-file-circle-check"></i></span>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-slate-800">QMS Audit Report Generated</p>
+                                    <p class="text-slate-500">Quarterly QMS Execution & Regulatory Compliance document compiled.</p>
+                                </div>
+                                <span class="text-slate-400">3 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. DEFECT LOG TAB -->
+                <div id="tab-defects" class="tab-content hidden space-y-5">
+                    
+                    <!-- Filters & Action Bar -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-3 flex-1">
+                            <div class="relative flex-1 min-w-[200px]">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="defect-search" oninput="filterDefects()" placeholder="Search defect ID, title, module..." class="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-medical-500">
+                            </div>
+                            
+                            <select id="defect-filter-status" onchange="filterDefects()" class="px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-medical-500">
+                                <option value="ALL">All Statuses</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+
+                            <select id="defect-filter-severity" onchange="filterDefects()" class="px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-medical-500">
+                                <option value="ALL">All Severities</option>
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+
+                        <button onclick="openDefectModal()" class="flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i> New Defect Entry
+                        </button>
+                    </div>
+
+                    <!-- Defects Table -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Defect ID</th>
+                                        <th class="p-4">Title & Description</th>
+                                        <th class="p-4">Module</th>
+                                        <th class="p-4">Severity</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4">Assignee</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="defect-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                    <!-- Dynamic content generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. CAPA REGISTER TAB -->
+                <div id="tab-capa" class="tab-content hidden space-y-5">
+                    
+                    <!-- Filters & Action Bar -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-3 flex-1">
+                            <div class="relative flex-1 min-w-[200px]">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="capa-search" oninput="filterCapa()" placeholder="Search CAPA ID, Root Cause, Source..." class="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tealmed-500">
+                            </div>
+
+                            <select id="capa-filter-status" onchange="filterCapa()" class="px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-tealmed-500">
+                                <option value="ALL">All Statuses</option>
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+
+                        <button onclick="openCapaModal()" class="flex items-center justify-center gap-2 bg-tealmed-600 hover:bg-tealmed-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition">
+                            <i class="fa-solid fa-plus"></i> New CAPA Action
+                        </button>
+                    </div>
+
+                    <!-- CAPA Table -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+                                        <th class="p-4">CAPA ID</th>
+                                        <th class="p-4">Source & Description</th>
+                                        <th class="p-4">Root Cause</th>
+                                        <th class="p-4">Target Date</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4">Owner</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="capa-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                    <!-- Dynamic content generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. QUALITY PLAN & KPIS TAB -->
+                <div id="tab-quality" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-base font-bold text-slate-800 mb-2">Hospital QMS Quality Plan & Objectives</h3>
+                        <p class="text-xs text-slate-500 mb-6">Execution metrics aligned with ISO 13485 (Medical Devices Quality Management) & HIPAA Standards.</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            
+                            <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold px-2 py-1 bg-medical-100 text-medical-700 rounded">Goal #1</span>
+                                        <i class="fa-solid fa-shield-halved text-medical-600 text-lg"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-slate-800 text-sm mb-1">Zero Critical Patient Safety Bugs</h4>
+                                    <p class="text-xs text-slate-500">Ensure drug interaction and dosing calculation features have 0 critical defects prior to deployment.</p>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+                                    <span class="text-slate-500">Current Status:</span>
+                                    <span class="font-bold text-emerald-600">Compliant (0 active in Prod)</span>
+                                </div>
+                            </div>
+
+                            <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold px-2 py-1 bg-amber-100 text-amber-700 rounded">Goal #2</span>
+                                        <i class="fa-solid fa-clock-rotate-left text-amber-600 text-lg"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-slate-800 text-sm mb-1">Defect Resolution SLA</h4>
+                                    <p class="text-xs text-slate-500">Critical bugs must be fixed within 24 hrs. High priority within 72 hrs.</p>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+                                    <span class="text-slate-500">SLA Achievement:</span>
+                                    <span class="font-bold text-amber-600">92.8% On-Time</span>
+                                </div>
+                            </div>
+
+                            <div class="p-5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold px-2 py-1 bg-teal-100 text-tealmed-700 rounded">Goal #3</span>
+                                        <i class="fa-solid fa-file-signature text-tealmed-600 text-lg"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-slate-800 text-sm mb-1">Audit Verification & Closure</h4>
+                                    <p class="text-xs text-slate-500">Maintain active CAPA item closure rate above 90% per audit review cycle.</p>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
+                                    <span class="text-slate-500">Current Rate:</span>
+                                    <span class="font-bold text-emerald-600">95% Closed</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Quality Metrics Checklists -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="font-bold text-slate-800 text-sm mb-4">Regulatory Compliance Milestones</h4>
+                            <ul class="space-y-3 text-xs">
+                                <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+                                    <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Patient Data Encryption Validation (HIPAA)</span>
+                                    <span class="font-semibold text-emerald-700">Passed</span>
+                                </li>
+                                <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+                                    <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> Audit Log Immutable Storage Verification</span>
+                                    <span class="font-semibold text-emerald-700">Passed</span>
+                                </li>
+                                <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+                                    <span class="flex items-center gap-2"><i class="fa-solid fa-spinner text-amber-500 animate-spin"></i> EHR Interoperability Risk Assessment</span>
+                                    <span class="font-semibold text-amber-700">In Review</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="font-bold text-slate-800 text-sm mb-4">Verification & Validation Strategy</h4>
+                            <div class="space-y-3 text-xs text-slate-600">
+                                <p><strong>Automated Test Execution:</strong> 142 Integration test suites running on nightly build triggers.</p>
+                                <p><strong>User Acceptance Testing (UAT):</strong> Signed off by Clinical QA Leads & Hospital Administration.</p>
+                                <p><strong>Traceability Index:</strong> 100% requirements-to-test coverage mapped in <code>Test_Cases.xlsx</code>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. REPORTS & DOCUMENTS TAB -->
+                <div id="tab-reports" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">QMS Artifacts & File Repository</h3>
+                                <p class="text-xs text-slate-500">Official project documentation, test logs, and quality audit registers.</p>
+                            </div>
+                            <button onclick="triggerToast('Downloading complete QMS Project bundle (.zip)...', 'success')" class="bg-medical-600 hover:bg-medical-700 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-2 transition">
+                                <i class="fa-solid fa-download"></i> Download All Artifacts
+                            </button>
+                        </div>
+
+                        <!-- Documents Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            
+                            <!-- Item 1 -->
+                            <div class="p-4 rounded-xl border border-slate-200 hover:border-medical-500 bg-white transition flex flex-col justify-between group">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-3 bg-rose-50 text-rose-600 rounded-lg text-lg">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h5 class="font-bold text-xs text-slate-800 truncate group-hover:text-medical-600">Requirements_Document.pdf</h5>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">SRS & Compliance Specs</p>
+                                        <p class="text-[10px] text-slate-400 mt-2">Size: 2.4 MB • Ver 1.2</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between">
+                                    <button onclick="simulateDocView('Requirements Document', 'Requirements_Document.pdf')" class="text-xs text-slate-600 hover:text-medical-600 font-medium">Preview</button>
+                                    <button onclick="triggerToast('Downloading Requirements_Document.pdf...', 'success')" class="text-xs text-medical-600 font-bold hover:underline">Download</button>
+                                </div>
+                            </div>
+
+                            <!-- Item 2 -->
+                            <div class="p-4 rounded-xl border border-slate-200 hover:border-medical-500 bg-white transition flex flex-col justify-between group">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg text-lg">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h5 class="font-bold text-xs text-slate-800 truncate group-hover:text-medical-600">Test_Cases.xlsx</h5>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Verification & Test Suite</p>
+                                        <p class="text-[10px] text-slate-400 mt-2">Size: 1.1 MB • 142 Cases</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between">
+                                    <button onclick="simulateDocView('Test Cases Register', 'Test_Cases.xlsx')" class="text-xs text-slate-600 hover:text-medical-600 font-medium">Preview</button>
+                                    <button onclick="triggerToast('Downloading Test_Cases.xlsx...', 'success')" class="text-xs text-medical-600 font-bold hover:underline">Download</button>
+                                </div>
+                            </div>
+
+                            <!-- Item 3 -->
+                            <div class="p-4 rounded-xl border border-slate-200 hover:border-medical-500 bg-white transition flex flex-col justify-between group">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-3 bg-teal-50 text-tealmed-600 rounded-lg text-lg">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h5 class="font-bold text-xs text-slate-800 truncate group-hover:text-medical-600">CAPA_Register.xlsx</h5>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Corrective & Preventive Action Log</p>
+                                        <p class="text-[10px] text-slate-400 mt-2">Size: 850 KB • Updated Today</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between">
+                                    <button onclick="simulateDocView('CAPA Register', 'CAPA_Register.xlsx')" class="text-xs text-slate-600 hover:text-medical-600 font-medium">Preview</button>
+                                    <button onclick="triggerToast('Downloading CAPA_Register.xlsx...', 'success')" class="text-xs text-medical-600 font-bold hover:underline">Download</button>
+                                </div>
+                            </div>
+
+                            <!-- Item 4 -->
+                            <div class="p-4 rounded-xl border border-slate-200 hover:border-medical-500 bg-white transition flex flex-col justify-between group">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-3 bg-rose-50 text-rose-600 rounded-lg text-lg">
+                                        <i class="fa-solid fa-file-excel"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h5 class="font-bold text-xs text-slate-800 truncate group-hover:text-medical-600">Defect_Log.xlsx</h5>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Full System Bug Repository</p>
+                                        <p class="text-[10px] text-slate-400 mt-2">Size: 920 KB • Sync Active</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between">
+                                    <button onclick="simulateDocView('Defect Log File', 'Defect_Log.xlsx')" class="text-xs text-slate-600 hover:text-medical-600 font-medium">Preview</button>
+                                    <button onclick="triggerToast('Downloading Defect_Log.xlsx...', 'success')" class="text-xs text-medical-600 font-bold hover:underline">Download</button>
+                                </div>
+                            </div>
+
+                            <!-- Item 5 -->
+                            <div class="p-4 rounded-xl border border-slate-200 hover:border-medical-500 bg-white transition flex flex-col justify-between group">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-3 bg-rose-50 text-rose-600 rounded-lg text-lg">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h5 class="font-bold text-xs text-slate-800 truncate group-hover:text-medical-600">QMS_Report.pdf</h5>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Audit Summary & Findings</p>
+                                        <p class="text-[10px] text-slate-400 mt-2">Size: 3.8 MB • Executive Draft</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between">
+                                    <button onclick="simulateDocView('QMS Quality Report', 'QMS_Report.pdf')" class="text-xs text-slate-600 hover:text-medical-600 font-medium">Preview</button>
+                                    <button onclick="triggerToast('Downloading QMS_Report.pdf...', 'success')" class="text-xs text-medical-600 font-bold hover:underline">Download</button>
+                                </div>
+                            </div>
+
+                            <!-- Item 6 -->
+                            <div class="p-4 rounded-xl border border-slate-200 hover:border-medical-500 bg-white transition flex flex-col justify-between group">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-3 bg-amber-50 text-amber-600 rounded-lg text-lg">
+                                        <i class="fa-solid fa-file-powerpoint"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <h5 class="font-bold text-xs text-slate-800 truncate group-hover:text-medical-600">HMS_QMS_Presentation.pptx</h5>
+                                        <p class="text-[11px] text-slate-400 mt-0.5">Management Review Slides</p>
+                                        <p class="text-[10px] text-slate-400 mt-2">Size: 5.2 MB • Deck</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between">
+                                    <button onclick="simulateDocView('HMS QMS Presentation Deck', 'HMS_QMS_Presentation.pptx')" class="text-xs text-slate-600 hover:text-medical-600 font-medium">Preview</button>
+                                    <button onclick="triggerToast('Downloading Presentation PPTX...', 'success')" class="text-xs text-medical-600 font-bold hover:underline">Download</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: ADD DEFECT -->
+    <div id="modal-defect" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-bug text-rose-600"></i> Log New Quality Defect
+                </h3>
+                <button onclick="closeModal('modal-defect')" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="submitDefect(event)" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Defect Summary / Title</label>
+                    <input type="text" id="form-defect-title" required placeholder="e.g. Lab result PDF rendering error on mobile" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Module</label>
+                        <select id="form-defect-module" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 outline-none">
+                            <option value="Pharmacy">Pharmacy</option>
+                            <option value="Patient Records">Patient Records</option>
+                            <option value="Billing & Claims">Billing & Claims</option>
+                            <option value="Laboratory">Laboratory</option>
+                            <option value="Emergency Care">Emergency Care</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Severity</label>
+                        <select id="form-defect-severity" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 outline-none">
+                            <option value="Critical">Critical</option>
+                            <option value="High" selected>High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Assignee</label>
+                        <input type="text" id="form-defect-assignee" required placeholder="e.g. Dr. Sarah Jenkins" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Status</label>
+                        <select id="form-defect-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 outline-none">
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-defect')" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold shadow-sm">Save Defect</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD CAPA -->
+    <div id="modal-capa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-shield-virus text-tealmed-600"></i> New CAPA Record
+                </h3>
+                <button onclick="closeModal('modal-capa')" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="submitCapa(event)" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Issue Description & Source</label>
+                    <input type="text" id="form-capa-source" required placeholder="e.g. Audit Finding: Prescription Dosage Override" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-tealmed-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Root Cause Analysis</label>
+                    <input type="text" id="form-capa-cause" required placeholder="e.g. Missing server-side boundary check" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-tealmed-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Owner / Lead</label>
+                        <input type="text" id="form-capa-owner" required placeholder="e.g. Mark Roberts" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-tealmed-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Target Date</label>
+                        <input type="date" id="form-capa-date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-tealmed-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-capa')" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-tealmed-600 hover:bg-tealmed-700 text-white rounded-lg font-semibold shadow-sm">Submit CAPA</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DOCUMENT PREVIEW SIMULATOR -->
+    <div id="modal-doc" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract text-tealmed-500"></i>
+                    <h3 id="doc-modal-title" class="font-bold text-sm">Document Viewer</h3>
+                </div>
+                <button onclick="closeModal('modal-doc')" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 font-mono text-xs text-slate-700 leading-relaxed max-h-60 overflow-y-auto" id="doc-modal-content">
+                    <!-- Dynamic Document Content Simulation -->
+                </div>
+                <div class="flex justify-between items-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+                    <span id="doc-modal-filename" class="font-semibold text-slate-700">filename.pdf</span>
+                    <button onclick="triggerToast('Document saved locally!', 'success'); closeModal('modal-doc');" class="bg-medical-600 text-white px-3 py-1.5 rounded hover:bg-medical-700 font-medium flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Download File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT STATE MANAGEMENT & INTERACTION LOGIC -->
+    <script>
+        // DATA STATE
+        let defects = [
+            { id: 'DEF-101', title: 'Penicillin Allergy Warning Popup Failure', module: 'Pharmacy', severity: 'Critical', status: 'Open', assignee: 'Dr. Sarah Jenkins' },
+            { id: 'DEF-102', title: 'Lab Result Numeric Precision Truncation', module: 'Laboratory', severity: 'High', status: 'In Progress', assignee: 'Alex Rivera' },
+            { id: 'DEF-103', title: 'Insurance Billing Claim Code Mismatch', module: 'Billing & Claims', severity: 'Medium', status: 'Closed', assignee: 'Michael Chen' },
+            { id: 'DEF-104', title: 'EHR Patient Encounter Export Timeout', module: 'Patient Records', severity: 'High', status: 'Open', assignee: 'Dr. Sarah Jenkins' },
+            { id: 'DEF-105', title: 'Emergency Room Triage Priority Dropdown Glitch', module: 'Emergency Care', severity: 'Critical', status: 'In Progress', assignee: 'Priya Sharma' },
+            { id: 'DEF-106', title: 'Prescription Printing Formatting Alignment', module: 'Pharmacy', severity: 'Low', status: 'Closed', assignee: 'Alex Rivera' },
+            { id: 'DEF-107', title: 'ICD-10 Search Indexing Slow Response', module: 'Patient Records', severity: 'Medium', status: 'In Progress', assignee: 'Michael Chen' },
+            { id: 'DEF-108', title: 'ICU Vital Monitor Data Sync Latency', module: 'Emergency Care', severity: 'High', status: 'Open', assignee: 'Priya Sharma' }
+        ];
+
+        let capas = [
+            { id: 'CAPA-001', source: 'Internal Audit: Pharmacy Dispensing Unit', rootCause: 'Outdated local drug validation cache', targetDate: '2026-11-05', status: 'In Progress', owner: 'Dr. Sarah Jenkins' },
+            { id: 'CAPA-002', source: 'Defect Trend: Billing Calculation Discrepancies', rootCause: 'Unhandled tax exemption code logic', targetDate: '2026-10-30', status: 'Open', owner: 'Michael Chen' },
+            { id: 'CAPA-003', source: 'Regulatory Review: HIPAA Audit Trail', rootCause: 'Session timeout logs purged prematurely', targetDate: '2026-11-12', status: 'Closed', owner: 'Alex Rivera' },
+            { id: 'CAPA-004', source: 'Lab Interface HL7 Data Mapping Error', rootCause: 'Incompatible third-party parser library', targetDate: '2026-11-02', status: 'In Progress', owner: 'Priya Sharma' },
+            { id: 'CAPA-005', source: 'User Feedback: Double Entry in Patient Intake', rootCause: 'UI form button debounce missing', targetDate: '2026-11-15', status: 'Open', owner: 'Alex Rivera' }
+        ];
+
+        // INITIALIZATION
+        window.onload = function() {
+            renderDefects();
+            renderCapas();
+            updateKPIs();
+        };
+
+        // TAB NAVIGATION
+        function switchTab(tabKey) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Unhighlight all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-medical-600', 'text-white');
+                btn.classList.add('text-slate-400');
+            });
+
+            // Show selected tab content
+            document.getElementById(`tab-${tabKey}`).classList.remove('hidden');
+
+            // Highlight selected button
+            const activeBtn = document.getElementById(`nav-${tabKey}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-medical-600', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            // Update Header Title
+            const titles = {
+                'dashboard': 'Dashboard Overview',
+                'defects': 'Defect Log & Verification',
+                'capa': 'Corrective & Preventive Actions (CAPA)',
+                'quality': 'Quality Plan & Audit KPIs',
+                'reports': 'Reports & Project Documentation'
+            };
+            document.getElementById('page-title').textContent = titles[tabKey] || 'HMS QMS';
+        }
+
+        // RENDER DEFECTS TABLE
+        function renderDefects() {
+            const tbody = document.getElementById('defect-table-body');
+            const searchVal = document.getElementById('defect-search')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('defect-filter-status')?.value || 'ALL';
+            const severityFilter = document.getElementById('defect-filter-severity')?.value || 'ALL';
+
+            const filtered = defects.filter(item => {
+                const matchesSearch = item.id.toLowerCase().includes(searchVal) ||
+                                      item.title.toLowerCase().includes(searchVal) ||
+                                      item.module.toLowerCase().includes(searchVal);
+                const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                const matchesSeverity = severityFilter === 'ALL' || item.severity === severityFilter;
+                return matchesSearch && matchesStatus && matchesSeverity;
+            });
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No defects match your filter criteria.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                // Severity Badge CSS
+                const sevColors = {
+                    'Critical': 'bg-rose-100 text-rose-700 border-rose-200',
+                    'High': 'bg-amber-100 text-amber-700 border-amber-200',
+                    'Medium': 'bg-sky-100 text-sky-700 border-sky-200',
+                    'Low': 'bg-slate-100 text-slate-700 border-slate-200'
+                };
+
+                // Status Badge CSS
+                const statusColors = {
+                    'Open': 'bg-rose-50 text-rose-600 border-rose-200',
+                    'In Progress': 'bg-amber-50 text-amber-600 border-amber-200',
+                    'Closed': 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                };
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-mono font-bold text-slate-900">${item.id}</td>
+                        <td class="p-4 font-semibold text-slate-800">${item.title}</td>
+                        <td class="p-4"><span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[11px] font-medium">${item.module}</span></td>
+                        <td class="p-4"><span class="px-2 py-0.5 rounded-full border text-[10px] font-bold ${sevColors[item.severity]}">${item.severity}</span></td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-full border text-[11px] font-medium ${statusColors[item.status]}">${item.status}</span></td>
+                        <td class="p-4 text-slate-600">${item.assignee}</td>
+                        <td class="p-4 text-right space-x-2">
+                            <button onclick="toggleDefectStatus('${item.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded border border-slate-300 font-medium">
+                                Cycle Status
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // RENDER CAPA TABLE
+        function renderCapas() {
+            const tbody = document.getElementById('capa-table-body');
+            const searchVal = document.getElementById('capa-search')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('capa-filter-status')?.value || 'ALL';
+
+            const filtered = capas.filter(item => {
+                const matchesSearch = item.id.toLowerCase().includes(searchVal) ||
+                                      item.source.toLowerCase().includes(searchVal) ||
+                                      item.rootCause.toLowerCase().includes(searchVal);
+                const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No CAPA records found matching criteria.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const statusColors = {
+                    'Open': 'bg-rose-50 text-rose-600 border-rose-200',
+                    'In Progress': 'bg-amber-50 text-amber-600 border-amber-200',
+                    'Closed': 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                };
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-mono font-bold text-tealmed-700">${item.id}</td>
+                        <td class="p-4 font-semibold text-slate-800">${item.source}</td>
+                        <td class="p-4 text-slate-600 italic">${item.rootCause}</td>
+                        <td class="p-4 font-mono text-slate-500">${item.targetDate}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 rounded-full border text-[11px] font-medium ${statusColors[item.status]}">${item.status}</span></td>
+                        <td class="p-4 text-slate-600">${item.owner}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="toggleCapaStatus('${item.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded border border-slate-300 font-medium">
+                                Cycle Status
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // FILTER TRIGGERS
+        function filterDefects() { renderDefects(); }
+        function filterCapa() { renderCapas(); }
+
+        // CYCLE STATUSES INTERACTIVELY
+        function toggleDefectStatus(id) {
+            const item = defects.find(d => d.id === id);
+            if(item) {
+                const sequence = ['Open', 'In Progress', 'Closed'];
+                const next = sequence[(sequence.indexOf(item.status) + 1) % sequence.length];
+                item.status = next;
+                renderDefects();
+                updateKPIs();
+                triggerToast(`Defect ${id} updated to "${next}"`, 'info');
+            }
+        }
+
+        function toggleCapaStatus(id) {
+            const item = capas.find(c => c.id === id);
+            if(item) {
+                const sequence = ['Open', 'In Progress', 'Closed'];
+                const next = sequence[(sequence.indexOf(item.status) + 1) % sequence.length];
+                item.status = next;
+                renderCapas();
+                updateKPIs();
+                triggerToast(`CAPA ${id} status updated to "${next}"`, 'info');
+            }
+        }
+
+        // UPDATE Dashboard KPIS & BAR CHARTS
+        function updateKPIs() {
+            // Defect counts
+            const totalDefects = defects.length;
+            const openDefects = defects.filter(d => d.status !== 'Closed').length;
+            
+            // CAPA counts
+            const openCapas = capas.filter(c => c.status !== 'Closed').length;
+
+            document.getElementById('kpi-total-defects').textContent = totalDefects;
+            document.getElementById('kpi-open-capa').textContent = openCapas;
+            document.getElementById('nav-defect-badge').textContent = openDefects;
+            document.getElementById('nav-capa-badge').textContent = openCapas;
+
+            // Update severity bar chart values
+            const criticals = defects.filter(d => d.severity === 'Critical').length;
+            const highs = defects.filter(d => d.severity === 'High').length;
+            const mediums = defects.filter(d => d.severity === 'Medium').length;
+            const lows = defects.filter(d => d.severity === 'Low').length;
+
+            const cPct = totalDefects ? Math.round((criticals/totalDefects)*100) : 0;
+            const hPct = totalDefects ? Math.round((highs/totalDefects)*100) : 0;
+            const mPct = totalDefects ? Math.round((mediums/totalDefects)*100) : 0;
+            const lPct = totalDefects ? Math.round((lows/totalDefects)*100) : 0;
+
+            document.getElementById('severity-critical-count').textContent = `${criticals} Defects (${cPct}%)`;
+            document.getElementById('severity-high-count').textContent = `${highs} Defects (${hPct}%)`;
+            document.getElementById('severity-medium-count').textContent = `${mediums} Defects (${mPct}%)`;
+            document.getElementById('severity-low-count').textContent = `${lows} Defects (${lPct}%)`;
+
+            document.getElementById('bar-critical').style.width = `${cPct}%`;
+            document.getElementById('bar-high').style.width = `${hPct}%`;
+            document.getElementById('bar-medium').style.width = `${mPct}%`;
+            document.getElementById('bar-low').style.width = `${lPct}%`;
+        }
+
+        // MODAL CONTROLS
+        function openDefectModal() { document.getElementById('modal-defect').classList.remove('hidden'); }
+        function openCapaModal() { document.getElementById('modal-capa').classList.remove('hidden'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+
+        // SUBMIT NEW DEFECT
+        function submitDefect(e) {
+            e.preventDefault();
+            const newId = `DEF-${100 + defects.length + 1}`;
+            const title = document.getElementById('form-defect-title').value;
+            const module = document.getElementById('form-defect-module').value;
+            const severity = document.getElementById('form-defect-severity').value;
+            const assignee = document.getElementById('form-defect-assignee').value;
+            const status = document.getElementById('form-defect-status').value;
+
+            defects.unshift({ id: newId, title, module, severity, status, assignee });
+            renderDefects();
+            updateKPIs();
+            closeModal('modal-defect');
+            triggerToast(`New Defect ${newId} logged successfully!`, 'success');
+            e.target.reset();
+        }
+
+        // SUBMIT NEW CAPA
+        function submitCapa(e) {
+            e.preventDefault();
+            const newId = `CAPA-00${capas.length + 1}`;
+            const source = document.getElementById('form-capa-source').value;
+            const rootCause = document.getElementById('form-capa-cause').value;
+            const owner = document.getElementById('form-capa-owner').value;
+            const targetDate = document.getElementById('form-capa-date').value;
+
+            capas.unshift({ id: newId, source, rootCause, targetDate, status: 'Open', owner });
+            renderCapas();
+            updateKPIs();
+            closeModal('modal-capa');
+            triggerToast(`New CAPA item ${newId} created!`, 'success');
+            e.target.reset();
+        }
+
+        // SIMULATE DOCUMENT PREVIEW
+        function simulateDocView(title, filename) {
+            document.getElementById('doc-modal-title').textContent = title;
+            document.getElementById('doc-modal-filename').textContent = filename;
+            
+            const contents = {
+                'Requirements_Document.pdf': `[HMS QMS REQUIREMENTS SPECIFICATION v1.2]\n\n1. SCOPE: Quality assurance framework for Hospital Management System modules.\n2. REGULATORY COMPLIANCE: Adherence to ISO 13485 & HIPAA Title II Security Rules.\n3. AUDIT REPOSITORY: Continuous defect logging and mandatory CAPA resolution cycles.\n4. VERIFICATION CRITERIA: 100% test case traceability prior to staging deployment.`,
+                'Test_Cases.xlsx': `[HMS VERIFICATION TEST SUITE SUMMARY]\n\nTotal Test Execution Cases: 142\n- Passed: 134 (94.3%)\n- Failed: 8 (Logged in Defect Register)\n- Blocked: 0\nModules Tested: EHR Core, Pharmacy Dispensing, Billing & Claims, Lab Interoperability.`,
+                'CAPA_Register.xlsx': `[CORRECTIVE AND PREVENTIVE ACTION LOG EXPORT]\n\nActive CAPA Records: 5\n- High Priority Corrective Actions: 2\n- Preventative Audit Measures: 3\nTarget Completion SLA: 14 business days.`,
+                'Defect_Log.xlsx': `[SYSTEM DEFECT & BUG AUDIT TRAIL]\n\nTotal System Bugs Recorded: 8\n- Critical Severity: 2 (Requires Immediate Patch)\n- High Severity: 3\n- Medium/Low: 3`,
+                'QMS_Report.pdf': `[QUARTERLY QUALITY MANAGEMENT SYSTEM EXECUTIVE REPORT]\n\nExecutive Summary: System compliance index evaluated at 94.2%. Average bug resolution SLA improved by 18% over previous cycle.\nRecommendation: Prioritize pharmacy dosage alert boundary verification.`,
+                'HMS_QMS_Presentation.pptx': `[MANAGEMENT REVIEW SLIDE DECK SUMMARY]\n\nSlide 1: QMS Implementation Milestones\nSlide 2: Audit Readiness & ISO 13485 Metrics\nSlide 3: CAPA Closure Trends & Risk Mitigation Plan\nSlide 4: Next Sprint Quality Goals`
+            };
+
+            document.getElementById('doc-modal-content').textContent = contents[filename] || 'Document preview content generated by HMS QMS system server.';
+            document.getElementById('modal-doc').classList.remove('hidden');
+        }
+
+        // TOAST NOTIFICATIONS SYSTEM
+        function triggerToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const bgColors = {
+                'success': 'bg-slate-900 border-emerald-500 text-white',
+                'info': 'bg-slate-900 border-medical-500 text-white',
+                'warning': 'bg-slate-900 border-amber-500 text-white'
+            };
+
+            const icons = {
+                'success': '<i class="fa-solid fa-circle-check text-emerald-400"></i>',
+                'info': '<i class="fa-solid fa-circle-info text-sky-400"></i>',
+                'warning': '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg border-l-4 shadow-lg text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${bgColors[type]}`;
+            toast.innerHTML = `${icons[type]} <span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            // Animate In
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            // Auto Remove after 3s
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
